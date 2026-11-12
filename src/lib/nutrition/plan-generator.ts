@@ -193,12 +193,22 @@ export function equivalentesDe(id: string, perfil?: PerfilBiometricoInput) {
 export function intercambiarIngrediente(plan: PlanNutricional, comidaId: string, alimentoId: string, reemplazoId?: string) {
   const comida = plan.dias.flatMap((dia) => dia.comidas).find((item) => item.id === comidaId);
   if (!comida) throw new Error("Comida no encontrada");
-  const reemplazo = reemplazoId
-    ? alimentoPorId.get(reemplazoId)
-    : equivalentesDeIntercambio(alimentoId, plan.perfil).map((item) => item.alimento)
-      .find((item) => !comida.ingredientes.some((ingrediente) => ingrediente.alimentoId === item.id));
-  if (!reemplazo) throw new Error("No hay equivalentes disponibles que respeten las alergias");
-  return intercambiarPorEquivalencia(plan, comidaId, alimentoId, reemplazo.id);
+  if (reemplazoId) {
+    const reemplazo = alimentoPorId.get(reemplazoId);
+    if (!reemplazo) throw new Error("No hay equivalentes disponibles que respeten las alergias");
+    return intercambiarPorEquivalencia(plan, comidaId, alimentoId, reemplazo.id);
+  }
+
+  const candidatos = equivalentesDeIntercambio(alimentoId, plan.perfil)
+    .map((item) => item.alimento)
+    .filter((item) => !comida.ingredientes.some((ingrediente) => ingrediente.alimentoId === item.id));
+  if (!candidatos.length) throw new Error("No hay equivalentes disponibles que respeten las alergias");
+
+  for (const candidato of candidatos) {
+    const resultado = intercambiarPorEquivalencia(plan, comidaId, alimentoId, candidato.id);
+    if (resultado.validacion.valido) return resultado;
+  }
+  return intercambiarPorEquivalencia(plan, comidaId, alimentoId, candidatos[0].id);
 }
 
 export function asignacionIntercambiosDelDia(plan: PlanNutricional, dia = 1): IntercambioAsignado[] {
