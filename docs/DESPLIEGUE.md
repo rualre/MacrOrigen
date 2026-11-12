@@ -44,7 +44,9 @@ Comprueba 10/10 inicios de sesión, estado ACTIVA, cupo ilimitado y un plan/swap
 
 ## 3. Base de datos
 
-1. Crear PostgreSQL en Neon o Supabase.
+1. Crear PostgreSQL gratuito en **Neon** (recomendado) o Supabase.
+   - Neon: proyecto nuevo, región cercana, copiar la cadena **pooled** con `?sslmode=require`.
+   - Supabase: proyecto nuevo, copiar la cadena de conexión de Postgres.
 2. Copiar la cadena a `DATABASE_URL` en `.env.local` y en Vercel.
 3. Aplicar el esquema y la semilla:
 
@@ -52,6 +54,7 @@ Comprueba 10/10 inicios de sesión, estado ACTIVA, cupo ilimitado y un plan/swap
 npx prisma generate
 npx prisma db push
 npm run db:seed
+npm run cuentas:demo:db
 ```
 
 4. Importar los intercambios autorizados:
