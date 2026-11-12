@@ -108,7 +108,7 @@
       <tr><td>Cuentas ilimitadas</td><td>10/10 login, estado ACTIVA, cupo ilimitado</td><td class="ok">APROBADO</td></tr>
       <tr><td>Importador de intercambios</td><td>CSV y JSON: 44 filas válidas</td><td class="ok">APROBADO</td></tr>
       <tr><td>Build y seguridad</td><td>Build Next.js, Prisma válido, npm audit 0</td><td class="ok">APROBADO</td></tr>
-      <tr><td>Despliegue Vercel/GitHub</td><td>Requiere credenciales y PostgreSQL para persistencia</td><td class="warn">PENDIENTE EXTERNO</td></tr>
+      <tr><td>Despliegue Vercel/GitHub</td><td>GitHub publicado y Vercel en producción: https://macrorigen.vercel.app</td><td class="ok">APROBADO</td></tr>
     </tbody>
   </table>
 </section>
@@ -198,6 +198,7 @@
       <tr><td>A10</td><td><code>import:intercambios --formato json</code></td><td>44 filas válidas, sin escribir</td><td>44 filas; 44 alimentos; dry-run</td><td class="ok">OK</td></tr>
       <tr><td>A11</td><td><code>GET /api/estado</code></td><td>Diagnóstico con conteos de intercambio</td><td>45 alimentos, 44 intercambios, 8 grupos</td><td class="ok">OK</td></tr>
       <tr><td>A12</td><td><code>GET/POST /api/diet/swap</code></td><td>Equivalentes sin LLM y plan recalculado</td><td>200; plan válido; proveedores IA: []</td><td class="ok">OK</td></tr>
+      <tr><td>A13</td><td><code>Producción Vercel</code></td><td>Login con cuenta demo y plan válido</td><td>Login OK; plan válido; swap no probado en producción</td><td class="ok">OK</td></tr>
     </tbody>
   </table>
 
@@ -370,15 +371,16 @@ npx tsx scripts/import-intercambios.ts --archivo data/intercambios-gaba-2015.jso
     <tbody>
       <tr><td>Tabla UdeA 5.ª ed. 2023 completa</td><td class="warn">No disponible públicamente</td><td>Cargar el archivo autorizado por la UdeA. El importador ya acepta CSV/JSON.</td></tr>
       <tr><td>Población infantil</td><td class="warn">Soportada, sin dataset</td><td>Cargar pesos/medidas pediátricos autorizados; no se inventaron.</td></tr>
-      <tr><td>PostgreSQL / Upstash</td><td class="warn">No configurados</td><td>Definir <code>DATABASE_URL</code>, ejecutar <code>prisma db push</code>, <code>db:seed</code> e importación.</td></tr>
-      <tr><td>Persistencia en Vercel</td><td class="warn">Bloqueada</td><td>Vercel no persiste <code>.data</code>. Migrar usuarios, cupos y suscripciones a PostgreSQL.</td></tr>
-      <tr><td>Publicación GitHub / Vercel</td><td class="warn">Bloqueada</td><td>Faltan autenticación, remoto Git y tokens del usuario. No se inventaron credenciales.</td></tr>
+      <tr><td>PostgreSQL / Neon</td><td class="ok">Configurado</td><td>Esquema, seed, importación y 10 cuentas creadas en Neon.</td></tr>
+      <tr><td>Persistencia en Vercel</td><td class="ok">Resuelta</td><td>Auth, cupo y suscripciones usan PostgreSQL; <code>.data</code> solo para demo local.</td></tr>
+      <tr><td>Upstash</td><td class="warn">Opcional</td><td>No configurado; el rate limit usa memoria por instancia.</td></tr>
+      <tr><td>Publicación GitHub / Vercel</td><td class="ok">Completada</td><td>GitHub: https://github.com/rualre/MacrOrigen · Vercel: https://macrorigen.vercel.app</td></tr>
       <tr><td>Pago real</td><td class="warn">Demo local</td><td>Integrar pasarela, precio definitivo y webhooks.</td></tr>
       <tr><td>Proveedores IA</td><td class="warn">Sin claves en esta ejecución</td><td>Configurar Gemini/Groq/OpenRouter gratuitos; el fallback determinístico ya funciona.</td></tr>
     </tbody>
   </table>
 
-  <div class="note"><b>Conclusión:</b> el sistema está aprobado para demostración local y para cargar datos autorizados. La afirmación “equivalencia oficial UdeA 2023” no se hace hasta disponer de la tabla completa. El despliegue público requiere persistencia y credenciales externas; no debe presentarse como listo para producción multiusuario mientras use <code>.data/auth.json</code>.</div>
+  <div class="note"><b>Conclusión:</b> el sistema está aprobado para demostración local y producción inicial. La afirmación “equivalencia oficial UdeA 2023” no se hace hasta disponer de la tabla completa. El despliegue quedó publicado en GitHub y Vercel, con persistencia real en Neon. Sigue pendiente el pago real, Upstash opcional y la carga autorizada de pesos pediátricos.</div>
 
   <div class="footer"><span>MacrOrigen 0.1.0 · Pruebas y resultados</span><span>12/11/2026 · Documento generado desde la ejecución real</span></div>
 </section>
