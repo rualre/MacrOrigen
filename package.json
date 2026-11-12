@@ -13,6 +13,7 @@
     "test:auth": "node scripts/auth-smoke-test.mjs",
     "test:cuentas": "node scripts/demo-accounts-smoke.mjs",
     "db:generate": "prisma generate",
+    "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "import:intercambios": "tsx scripts/import-intercambios.ts",
