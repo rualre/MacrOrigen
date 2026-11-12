@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>MacrOrigen — 3 pruebas manuales prioritarias</title>
+<style>
+@page { size: A4; margin: 16mm 14mm; }
+body { font-family: "Segoe UI", Arial, sans-serif; color:#17211f; font-size:10.5pt; line-height:1.45; }
+h1 { font-size:22pt; color:#0b2b27; margin:0 0 8px; }
+h2 { font-size:15pt; color:#0b2b27; margin:18px 0 6px; border-bottom:2px solid #d9f4ea; padding-bottom:4px; }
+h3 { font-size:11.5pt; margin:12px 0 4px; }
+table { width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:9pt; }
+th,td { border:1px solid #d7e2df; padding:6px 7px; vertical-align:top; }
+th { background:#e8f6f1; color:#0b3d36; }
+.ok { color:#047857; font-weight:700; }
+.step { margin:4px 0; }
+.check { display:inline-block; width:12px; height:12px; border:1.5px solid #334155; margin-right:6px; vertical-align:middle; }
+.note { border-left:4px solid #f59e0b; background:#fffbeb; padding:8px 11px; border-radius:0 7px 7px 0; margin:10px 0; }
+</style>
+</head>
+<body>
+<h1>3 pruebas manuales prioritarias</h1>
+<p>MacrOrigen 0.1.0 · Fecha sugerida: 12/11/2026 · Entorno: http://localhost:3000 o https://macrorigen.vercel.app</p>
+<p>Marca cada casilla con una <strong>X</strong> y captura evidencia (captura de pantalla o URL) en la columna correspondiente.</p>
+
+<h2>Prueba 1 — Flujo nutricional completo</h2>
+<p><strong>Objetivo:</strong> validar onboarding, generación de plan, intercambio y explorador.</p>
+<p><strong>Prerrequisitos:</strong> servidor levantado o URL de producción; cuenta demo o acceso gratuito.</p>
+<table>
+<thead><tr><th>#</th><th>Paso</th><th>Resultado esperado</th><th>Evidencia</th><th>OK</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Abrir la app y desplazarse a la sección de plan.</td><td>Se muestra la identidad MacrOrigen, aviso médico y acceso gratuito.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>2</td><td>Ingresar sexo masculino, edad 32, peso 74.5 kg, estatura 176 cm, fórmula Mifflin, actividad moderada, 4 comidas, 1 día.</td><td>Los campos aceptan los valores sin error.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>3</td><td>Seleccionar objetivo Mantener y preferencia Priorizar criollos.</td><td>El botón queda seleccionado visualmente.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>4</td><td>Pulsar “Crear mi plan nutricional”.</td><td>Se genera un plan con comidas y macros; desviación ≤ 3%.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>5</td><td>Revisar el resumen de intercambios por grupo.</td><td>Aparecen grupos (lácteos, carnes, cereales, frutas, verduras, grasas, azúcares) con cantidades enteras.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>6</td><td>Pulsar “Intercambiar” en un alimento con intercambio.</td><td>Solo se muestran equivalentes del mismo subgrupo, con gramos y medida casera.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>7</td><td>Aplicar un equivalente.</td><td>El alimento cambia, los gramos se recalculan y el plan sigue dentro de ±3%.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>8</td><td>Ir a “Explorar alimentos”, buscar “Arepa”.</td><td>Resultados con nombre, grupo, gramos por intercambio y estado.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>9</td><td>Abrir la ficha de un alimento.</td><td>Se muestran 23 nutrientes por 100 g y la fuente/estado.</td><td></td><td><span class="check"></span></td></tr>
+</tbody>
+</table>
+
+<h2>Prueba 2 — Acceso, cupo y cuentas ilimitadas</h2>
+<p><strong>Objetivo:</strong> validar autenticación, 3 intentos gratuitos y cuentas demo.</p>
+<table>
+<thead><tr><th>#</th><th>Paso</th><th>Resultado esperado</th><th>Evidencia</th><th>OK</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Sin iniciar sesión, generar un plan 3 veces.</td><td>El contador baja de 3 a 0.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>2</td><td>Intentar una cuarta generación.</td><td>Se bloquea con paywall o HTTP 403.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>3</td><td>Iniciar sesión con demo01@macrorigen.app y su contraseña privada.</td><td>Estado ACTIVA, cupo ilimitado, sin paywall.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>4</td><td>Generar un plan estando autenticado.</td><td>El plan se genera y no consume cupo gratuito.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>5</td><td>Cerrar sesión y volver a entrar.</td><td>La sesión persiste o se puede reautenticar; el estado se recupera.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>6</td><td>Probar otra cuenta demo (demo02 … demo10).</td><td>Todas inician sesión y quedan ACTIVAS.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>7</td><td>Intentar un swap sin sesión o con cupo agotado.</td><td>HTTP 403 con código SUBSCRIPTION_REQUIRED.</td><td></td><td><span class="check"></span></td></tr>
+</tbody>
+</table>
+
+<h2>Prueba 3 — Despliegue y persistencia en producción</h2>
+<p><strong>Objetivo:</strong> validar que GitHub, Vercel y Neon quedaron correctamente configurados.</p>
+<table>
+<thead><tr><th>#</th><th>Paso</th><th>Resultado esperado</th><th>Evidencia</th><th>OK</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Abrir https://macrorigen.vercel.app.</td><td>La app carga con HTTP 200.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>2</td><td>Iniciar sesión con una cuenta demo en producción.</td><td>Login exitoso y estado ACTIVA.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>3</td><td>Generar un plan en producción.</td><td>Plan válido y macros dentro de ±3%.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>4</td><td>Verificar variables en Vercel: AUTH_SECRET, DATABASE_URL, ALLOW_DEMO_CHECKOUT.</td><td>Todas configuradas; AUTH_SECRET oculto como secreto.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>5</td><td>Verificar la base en Neon.</td><td>Tablas creadas, 45 alimentos, 44 intercambios y 10 usuarios.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>6</td><td>Revisar el repositorio GitHub.</td><td>Commit principal visible y sin .data ni .env.local.</td><td></td><td><span class="check"></span></td></tr>
+<tr><td>7</td><td>Verificar el PDF de pruebas.</td><td>docs/PRUEBAS-Y-RESULTADOS.pdf existe y resume resultados.</td><td></td><td><span class="check"></span></td></tr>
+</tbody>
+</table>
+
+<div class="note"><strong>Nota:</strong> las contraseñas de las 10 cuentas están en <code>.data/cuentas-demo.csv</code>, archivo ignorado por Git. No las pegues en repositorios ni PDFs públicos.</div>
+</body>
+</html>
