@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { loginSchema } from "@/lib/validation/auth-schemas";
 import { insertarSesion, verificarPassword } from "@/lib/auth/security";
-import { buscarUsuarioPorEmail } from "@/lib/auth/local-store";
+import { buscarUsuarioPorEmail } from "@/lib/auth/store";
 import { aplicarCookiesAcceso, estadoUsuario, resolverAcceso } from "@/lib/auth/access";
 import { ipDe, limitarPlanes } from "@/lib/security/rate-limit";
 

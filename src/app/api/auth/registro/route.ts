@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
 import { registroSchema } from "@/lib/validation/auth-schemas";
 import { hashPassword, insertarSesion } from "@/lib/auth/security";
-import { actualizarStore } from "@/lib/auth/local-store";
+import { crearUsuario } from "@/lib/auth/store";
 import { aplicarCookiesAcceso, estadoUsuario, precioSuscripcion, resolverAcceso } from "@/lib/auth/access";
-import type { UsuarioLocal } from "@/lib/auth/types";
 import { ipDe, limitarPlanes } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
@@ -17,11 +15,11 @@ export async function POST(request: Request) {
     const parsed = registroSchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Datos inválidos" }, { status: 400 });
     const passwordHash = await hashPassword(parsed.data.password);
-    const ahora = new Date().toISOString();
-    const nuevo: UsuarioLocal = { id: randomUUID(), email: parsed.data.email, nombre: parsed.data.nombre, passwordHash, creadoEn: ahora, suscripcion: { estado: "PENDIENTE", proveedor: "POR_CONFIGURAR", precioCOP: precioSuscripcion() } };
-    await actualizarStore((store) => {
-      if (store.usuarios.some((user) => user.email === nuevo.email)) throw new Error("EMAIL_EXISTS");
-      store.usuarios.push(nuevo);
+    const nuevo = await crearUsuario({
+      email: parsed.data.email,
+      nombre: parsed.data.nombre,
+      passwordHash,
+      precioCOP: precioSuscripcion(),
     });
     const response = NextResponse.json({ access: estadoUsuario(nuevo), mensaje: "Cuenta creada. Completa la suscripción para desbloquear MacrOrigen." }, { status: 201 });
     insertarSesion(response, nuevo.id);

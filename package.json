@@ -16,7 +16,8 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "import:intercambios": "tsx scripts/import-intercambios.ts",
-    "cuentas:demo": "node scripts/crear-cuentas-demo.mjs"
+    "cuentas:demo": "node scripts/crear-cuentas-demo.mjs",
+    "cuentas:demo:db": "node scripts/crear-cuentas-demo.mjs --postgres"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

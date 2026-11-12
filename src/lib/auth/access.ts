@@ -1,7 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import type { NextResponse } from "next/server";
-import { actualizarStore, buscarUsuarioPorId } from "./local-store";
+import { buscarUsuarioPorId, consumirUso, obtenerUso } from "./store";
 import { insertarGuest, leerGuest, leerSesion } from "./security";
 import { INTENTOS_GRATIS, type AccessResolution, type AccessState, type UsuarioLocal } from "./types";
 
@@ -33,12 +33,7 @@ export async function resolverAcceso(request: Request, crearGuest = true): Promi
   let guestId = leerGuest(request) ?? undefined;
   const nuevoGuestId = !guestId && crearGuest ? randomUUID() : undefined;
   if (nuevoGuestId) guestId = nuevoGuestId;
-  const usados = guestId ? await actualizarStore((store) => {
-    const actual = store.usosGratuitos[guestId!];
-    if (actual) return actual.usados;
-    store.usosGratuitos[guestId!] = { usados: 0, creadoEn: new Date().toISOString(), actualizadoEn: new Date().toISOString() };
-    return 0;
-  }) : 0;
+  const usados = guestId ? await obtenerUso(guestId) : 0;
   const restantes = Math.max(0, INTENTOS_GRATIS - usados);
   return {
     guestId, nuevoGuestId,
@@ -48,13 +43,7 @@ export async function resolverAcceso(request: Request, crearGuest = true): Promi
 
 /** Incremento atómico y con segunda comprobación para evitar superar el cupo en paralelo. */
 export async function consumirIntento(guestId: string) {
-  return actualizarStore((store) => {
-    const ahora = new Date().toISOString();
-    const uso = store.usosGratuitos[guestId] ?? { usados: 0, creadoEn: ahora, actualizadoEn: ahora };
-    if (uso.usados >= INTENTOS_GRATIS) return { permitido: false, usados: uso.usados };
-    uso.usados += 1; uso.actualizadoEn = ahora; store.usosGratuitos[guestId] = uso;
-    return { permitido: true, usados: uso.usados };
-  });
+  return consumirUso(guestId);
 }
 
 export function estadoDesdeResolucion(resolucion: AccessResolution, usados?: number): AccessState {
