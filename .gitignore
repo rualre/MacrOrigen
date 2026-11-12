@@ -6,6 +6,8 @@ node_modules/
 next-env.d.ts
 .data/
 coverage/
+test-results/
+demo-videos/*.webm
 .DS_Store
 docs/tcac_web.pdf
 docs/Lista de intercambios - U de Antioquia 2.pdf
