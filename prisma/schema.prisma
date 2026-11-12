@@ -1,0 +1,404 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrigenTipo {
+  CRIOLLO
+  NO_CRIOLLO
+}
+
+enum GrupoAlimenticio {
+  CARNES
+  PESCADOS
+  HUEVOS
+  LACTEOS
+  ACEITES_GRASAS
+  TUBERCULOS
+  CEREALES
+  FRUTAS
+  VERDURAS
+  LEGUMINOSAS
+  PROCESADOS
+  BEBIDAS
+  FRUTOS_SECOS
+  AZUCARES
+}
+
+enum Sexo {
+  FEMENINO
+  MASCULINO
+}
+
+enum NivelActividad {
+  SEDENTARIO
+  LIGERO
+  MODERADO
+  ALTO
+  MUY_ALTO
+}
+
+enum ObjetivoNutricional {
+  PERDIDA
+  MANTENIMIENTO
+  AUMENTO
+}
+
+enum FormulaCalculo {
+  MIFFLIN
+  HARRIS
+}
+
+enum PreferenciaOrigen {
+  TODOS
+  PRIORIZAR_CRIOLLOS
+  INCLUIR_COMERCIALES
+}
+
+enum EstadoPlan {
+  BORRADOR
+  ACTIVO
+  COMPLETADO
+  ARCHIVADO
+}
+
+enum EstadoSuscripcion {
+  PENDIENTE
+  ACTIVA
+  CANCELADA
+  VENCIDA
+}
+
+enum PoblacionObjetivo {
+  ADULTOS
+  NINOS
+}
+
+enum GrupoIntercambioClave {
+  LACTEOS
+  SUSTITUTOS
+  CARNES_MAGRAS
+  CEREALES
+  VERDURAS
+  FRUTAS
+  GRASAS
+  AZUCARES
+}
+
+enum EstadoFuenteIntercambio {
+  VERIFICADO
+  HOMOLOGADO
+  DERIVADO
+  PENDIENTE
+}
+
+enum TipoComida {
+  DESAYUNO
+  MEDIA_MANANA
+  ALMUERZO
+  MERIENDA
+  CENA
+  OTRO
+}
+
+model Usuario {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  nombre            String?
+  passwordHash      String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  perfilBiometrico  PerfilBiometrico?
+  planesNutricionales PlanNutricional[]
+  suscripcion        Suscripcion?
+}
+
+model Suscripcion {
+  id                String             @id @default(cuid())
+  usuarioId         String             @unique
+  usuario           Usuario            @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  estado            EstadoSuscripcion  @default(PENDIENTE)
+  proveedor         String             @default("POR_CONFIGURAR")
+  referenciaExterna String?            @unique
+  precioCOP         Int                @default(29900)
+  moneda            String             @default("COP")
+  finPeriodo        DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([estado, finPeriodo])
+}
+
+model UsoGratuito {
+  id           String   @id // UUID del visitante firmado en cookie HttpOnly
+  intentos     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PerfilBiometrico {
+  id                String               @id @default(cuid())
+  usuarioId         String               @unique
+  usuario           Usuario              @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  sexo              Sexo
+  fechaNacimiento   DateTime             @db.Date
+  estaturaCm        Decimal              @db.Decimal(5, 2)
+  pesoKg            Decimal              @db.Decimal(5, 2)
+  porcentajeGrasa   Decimal?             @db.Decimal(5, 2)
+  nivelActividad    NivelActividad
+  objetivo          ObjetivoNutricional
+  formula           FormulaCalculo
+  preferenciaOrigen PreferenciaOrigen    @default(TODOS)
+  alergias          String[]             @default([])
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+}
+
+model FuenteNutricional {
+  id         String               @id @default(cuid())
+  nombre     String
+  documento  String
+  url        String
+  anio       Int
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  alimentos  AlimentoColombiano[]
+
+  @@unique([nombre, documento, anio])
+  @@index([nombre])
+}
+
+model AlimentoColombiano {
+  id                       String             @id @default(cuid())
+  nombre                   String
+  slug                     String             @unique
+  nombreCientifico         String?
+  grupo                    GrupoAlimenticio
+  subgrupo                 String
+  origenTipo               OrigenTipo
+  detalleOrigen            String
+  marca                    String?
+  descripcion              String?
+  unidadBase               String
+  porcionComun             Decimal            @db.Decimal(8, 2)
+  porcionComunDescripcion  String
+  energiaKcal              Decimal            @db.Decimal(14, 6)
+  energiaKj                Decimal            @db.Decimal(14, 6)
+  aguaG                    Decimal            @db.Decimal(14, 6)
+  proteinaG                Decimal            @db.Decimal(14, 6)
+  carbohidratosG           Decimal            @db.Decimal(14, 6)
+  fibraG                   Decimal            @db.Decimal(14, 6)
+  azucaresG                Decimal            @db.Decimal(14, 6)
+  grasasTotalesG           Decimal            @db.Decimal(14, 6)
+  grasasSaturadasG         Decimal            @db.Decimal(14, 6)
+  grasasMonoinsaturadasG   Decimal            @db.Decimal(14, 6)
+  grasasPoliinsaturadasG   Decimal            @db.Decimal(14, 6)
+  colesterolMg             Decimal            @db.Decimal(14, 6)
+  sodioMg                  Decimal            @db.Decimal(14, 6)
+  potasioMg                Decimal            @db.Decimal(14, 6)
+  calcioMg                 Decimal            @db.Decimal(14, 6)
+  hierroMg                 Decimal            @db.Decimal(14, 6)
+  magnesioMg               Decimal            @db.Decimal(14, 6)
+  fosforoMg                Decimal            @db.Decimal(14, 6)
+  zincMg                   Decimal            @db.Decimal(14, 6)
+  vitaminaAMcg             Decimal            @db.Decimal(14, 6)
+  vitaminaCMg              Decimal            @db.Decimal(14, 6)
+  vitaminaB12Mcg           Decimal            @db.Decimal(14, 6)
+  folatoMcg                Decimal            @db.Decimal(14, 6)
+  alergenos                String[]           @default([])
+  etiquetas                String[]           @default([])
+  fuenteId                 String?
+  fuente                   FuenteNutricional? @relation(fields: [fuenteId], references: [id], onDelete: SetNull)
+  fechaActualizacion       DateTime
+  embedding                Unsupported("vector(768)")?
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+  ingredientesPlan         IngredientePlan[]
+  itemsListaCompras        ItemListaCompras[]
+  intercambios             IntercambioAlimento[]
+
+  @@index([nombre])
+  @@index([grupo, origenTipo])
+  @@index([origenTipo])
+  @@index([subgrupo])
+}
+
+model GrupoIntercambio {
+  id          String                @id
+  nombre      String
+  orden       Int
+  descripcion String
+  energiaKcal Decimal               @db.Decimal(10, 2)
+  proteinaG   Decimal               @db.Decimal(10, 2)
+  carbohidratosG Decimal            @db.Decimal(10, 2)
+  grasasG     Decimal               @db.Decimal(10, 2)
+  fibraG      Decimal               @default(0) @db.Decimal(10, 2)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  subgrupos   SubgrupoIntercambio[]
+
+  @@index([orden])
+}
+
+model SubgrupoIntercambio {
+  id                String               @id
+  grupoId           String
+  grupo             GrupoIntercambio     @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+  nombre            String
+  orden             Int
+  poblacionObjetivo PoblacionObjetivo    @default(ADULTOS)
+  energiaKcal       Decimal              @db.Decimal(10, 2)
+  proteinaG         Decimal              @db.Decimal(10, 2)
+  carbohidratosG    Decimal              @db.Decimal(10, 2)
+  grasasG           Decimal              @db.Decimal(10, 2)
+  fibraG            Decimal              @default(0) @db.Decimal(10, 2)
+  fuenteNombre      String
+  fuenteDocumento   String
+  fuenteUrl         String
+  fuenteAnio        Int
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  intercambios      IntercambioAlimento[]
+
+  @@unique([grupoId, nombre, poblacionObjetivo])
+  @@index([grupoId, orden])
+}
+
+model IntercambioAlimento {
+  id                 String                @id @default(cuid())
+  alimentoId         String
+  alimento           AlimentoColombiano    @relation(fields: [alimentoId], references: [id], onDelete: Cascade)
+  subgrupoId         String
+  subgrupo           SubgrupoIntercambio   @relation(fields: [subgrupoId], references: [id], onDelete: Restrict)
+  poblacionObjetivo  PoblacionObjetivo     @default(ADULTOS)
+  gramosPorIntercambio Decimal             @db.Decimal(8, 2)
+  medidaCasera       String
+  estado             EstadoFuenteIntercambio @default(PENDIENTE)
+  fuenteNombre       String
+  fuenteDocumento    String
+  fuenteUrl          String
+  fuenteAnio         Int
+  nota               String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  @@unique([alimentoId, subgrupoId, poblacionObjetivo])
+  @@index([alimentoId, poblacionObjetivo])
+  @@index([subgrupoId, estado])
+}
+
+model PlanNutricional {
+  id                       String              @id @default(cuid())
+  usuarioId                String
+  usuario                  Usuario             @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  nombre                   String
+  fechaInicio              DateTime            @db.Date
+  fechaFin                 DateTime?           @db.Date
+  objetivo                 ObjetivoNutricional
+  tmbKcal                  Decimal             @db.Decimal(10, 2)
+  tdeeKcal                 Decimal             @db.Decimal(10, 2)
+  kcalObjetivo             Decimal             @db.Decimal(10, 2)
+  proteinaObjetivoG        Decimal             @db.Decimal(10, 2)
+  carbohidratosObjetivoG   Decimal             @db.Decimal(10, 2)
+  grasasObjetivoG          Decimal             @db.Decimal(10, 2)
+  toleranciaPorcentaje     Decimal             @default(3) @db.Decimal(5, 2)
+  estado                   EstadoPlan          @default(BORRADOR)
+  intercambiosJson         Json?
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  comidas                  ComidaPlan[]
+  listasCompras            ListaCompras[]
+
+  @@index([usuarioId, estado])
+  @@index([usuarioId, fechaInicio])
+}
+
+model ComidaPlan {
+  id           String           @id @default(cuid())
+  planId       String
+  plan         PlanNutricional  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  dia          Int
+  tipo         TipoComida
+  orden        Int
+  nombre       String?
+  intercambiosJson Json?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  ingredientes IngredientePlan[]
+
+  @@unique([planId, dia, orden])
+  @@index([planId, dia, tipo])
+}
+
+model IngredientePlan {
+  id                       String              @id @default(cuid())
+  comidaPlanId             String
+  comidaPlan               ComidaPlan          @relation(fields: [comidaPlanId], references: [id], onDelete: Cascade)
+  alimentoId               String
+  alimento                 AlimentoColombiano  @relation(fields: [alimentoId], references: [id], onDelete: Restrict)
+  nombreAlimento           String
+  gramos                   Decimal             @db.Decimal(10, 2)
+  energiaKcal              Decimal             @db.Decimal(14, 6)
+  energiaKj                Decimal             @db.Decimal(14, 6)
+  aguaG                    Decimal             @db.Decimal(14, 6)
+  proteinaG                Decimal             @db.Decimal(14, 6)
+  carbohidratosG           Decimal             @db.Decimal(14, 6)
+  fibraG                   Decimal             @db.Decimal(14, 6)
+  azucaresG                Decimal             @db.Decimal(14, 6)
+  grasasTotalesG           Decimal             @db.Decimal(14, 6)
+  grasasSaturadasG         Decimal             @db.Decimal(14, 6)
+  grasasMonoinsaturadasG   Decimal             @db.Decimal(14, 6)
+  grasasPoliinsaturadasG   Decimal             @db.Decimal(14, 6)
+  colesterolMg             Decimal             @db.Decimal(14, 6)
+  sodioMg                  Decimal             @db.Decimal(14, 6)
+  potasioMg                Decimal             @db.Decimal(14, 6)
+  calcioMg                 Decimal             @db.Decimal(14, 6)
+  hierroMg                 Decimal             @db.Decimal(14, 6)
+  magnesioMg               Decimal             @db.Decimal(14, 6)
+  fosforoMg                Decimal             @db.Decimal(14, 6)
+  zincMg                   Decimal             @db.Decimal(14, 6)
+  vitaminaAMcg             Decimal             @db.Decimal(14, 6)
+  vitaminaCMg              Decimal             @db.Decimal(14, 6)
+  vitaminaB12Mcg           Decimal             @db.Decimal(14, 6)
+  folatoMcg                Decimal             @db.Decimal(14, 6)
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+
+  @@index([comidaPlanId])
+  @@index([alimentoId])
+}
+
+model ListaCompras {
+  id         String             @id @default(cuid())
+  planId     String
+  plan       PlanNutricional    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  nombre     String
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  items      ItemListaCompras[]
+
+  @@index([planId])
+}
+
+model ItemListaCompras {
+  id                String              @id @default(cuid())
+  listaComprasId    String
+  listaCompras      ListaCompras        @relation(fields: [listaComprasId], references: [id], onDelete: Cascade)
+  alimentoId        String?
+  alimento          AlimentoColombiano? @relation(fields: [alimentoId], references: [id], onDelete: SetNull)
+  nombreAlimento    String
+  cantidad          Decimal             @db.Decimal(12, 2)
+  unidad            String
+  cantidadGramos    Decimal?            @db.Decimal(12, 2)
+  comprado          Boolean             @default(false)
+  notas             String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([listaComprasId, comprado])
+  @@index([alimentoId])
+}

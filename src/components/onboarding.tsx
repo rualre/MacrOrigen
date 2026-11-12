@@ -1,0 +1,54 @@
+"use client";
+import { useState } from "react";
+import { Activity, ArrowRight, BrainCircuit, Calculator, Check, Database, LoaderCircle, ShieldCheck, Target, UserRound } from "lucide-react";
+import type { PerfilBiometricoInput, PlanNutricional } from "@/lib/domain/types";
+import type { AccessState } from "@/lib/auth/types";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Select } from "./ui/select";
+import { Field } from "./ui/field";
+
+export interface IAInfo { utilizada?: boolean; mensaje?: string; proveedor?: string | null; proveedoresConfigurados?: string[]; errores?: string[] }
+const INICIAL: PerfilBiometricoInput = { nombre: "Invitado", edad: 32, sexo: "FEMENINO", pesoKg: 70, alturaCm: 165, nivelActividad: "MODERADO", objetivo: "MANTENIMIENTO", formula: "MIFFLIN", preferenciaOrigen: "PRIORIZAR_CRIOLLOS", alergias: [], comidasAlDia: 4, dias: 1 };
+const alergiasDisponibles = ["LACTEOS", "HUEVO", "GLUTEN", "PESCADO", "FRUTOS_SECOS"];
+
+export function Onboarding({ onGenerated, perfilInicial, onNeedSubscription }: { onGenerated: (plan: PlanNutricional, ia: IAInfo, access?: AccessState) => void; perfilInicial?: PerfilBiometricoInput; onNeedSubscription: (access?: AccessState) => void }) {
+  const [perfil, setPerfil] = useState(perfilInicial ?? INICIAL);
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState("");
+  function actualizar<K extends keyof PerfilBiometricoInput>(key: K, value: PerfilBiometricoInput[K]) { setPerfil((p) => ({ ...p, [key]: value })); }
+  function alternarAlergia(valor: string) { actualizar("alergias", perfil.alergias.includes(valor) ? perfil.alergias.filter((a) => a !== valor) : [...perfil.alergias, valor]); }
+  async function enviar(e: React.FormEvent) {
+    e.preventDefault(); setCargando(true); setError("");
+    try {
+      const response = await fetch("/api/planes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ perfil, usarIA: true }) });
+      const data = await response.json();
+      if (data.code === "SUBSCRIPTION_REQUIRED") { onNeedSubscription(data.access); return; }
+      if (!response.ok) throw new Error(data.detalles?.[0]?.mensaje ?? data.error ?? "No fue posible generar el plan");
+      onGenerated(data.plan, data.ia, data.access);
+    } catch (e) { setError((e as Error).message); }
+    finally { setCargando(false); }
+  }
+  return <div className="grid gap-6 lg:grid-cols-[1.55fr_1fr]">
+    <form onSubmit={enviar} className="rounded-3xl border bg-card p-5 shadow-soft md:p-7">
+      <div className="mb-6"><span className="text-xs font-bold uppercase tracking-widest text-emerald-600">Tu punto de partida</span><h2 className="mt-1 text-2xl font-extrabold">Cuéntanos sobre ti</h2><p className="mt-1 text-sm text-muted-foreground">Calculamos tus metas en el servidor antes de seleccionar los alimentos.</p></div>
+      <div className="space-y-7">
+        <section><SectionTitle icon={<UserRound className="h-4 w-4" />} number="01" title="Datos biométricos" /><div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3"><Field label="Nombre (opcional)"><Input value={perfil.nombre} onChange={(e) => actualizar("nombre", e.target.value)} maxLength={50} /></Field><Field label="Edad"><Input type="number" min={18} max={90} value={perfil.edad} onChange={(e) => actualizar("edad", Number(e.target.value))} required /></Field><Field label="Sexo para la fórmula"><Select value={perfil.sexo} onChange={(e) => actualizar("sexo", e.target.value as never)}><option value="FEMENINO">Femenino</option><option value="MASCULINO">Masculino</option></Select></Field><Field label="Peso (kg)"><Input type="number" step="0.1" min={35} max={300} value={perfil.pesoKg} onChange={(e) => actualizar("pesoKg", Number(e.target.value))} required /></Field><Field label="Estatura (cm)"><Input type="number" step="0.1" min={130} max={230} value={perfil.alturaCm} onChange={(e) => actualizar("alturaCm", Number(e.target.value))} required /></Field><Field label="Fórmula de TMB"><Select value={perfil.formula} onChange={(e) => actualizar("formula", e.target.value as never)}><option value="MIFFLIN">Mifflin-St Jeor</option><option value="HARRIS">Harris-Benedict</option></Select></Field></div></section>
+        <section><SectionTitle icon={<Activity className="h-4 w-4" />} number="02" title="Rutina y objetivo" /><div className="grid gap-4 sm:grid-cols-2"><Field label="Nivel de actividad física"><Select value={perfil.nivelActividad} onChange={(e) => actualizar("nivelActividad", e.target.value as never)}><option value="SEDENTARIO">Sedentario · poco o nada</option><option value="LIGERO">Ligero · 1–3 días/semana</option><option value="MODERADO">Moderado · 3–5 días/semana</option><option value="ALTO">Alto · 6–7 días/semana</option><option value="MUY_ALTO">Muy alto · trabajo físico + deporte</option></Select></Field><Field label="Comidas al día"><Select value={perfil.comidasAlDia} onChange={(e) => actualizar("comidasAlDia", Number(e.target.value))}>{[3, 4, 5, 6].map((n) => <option key={n} value={n}>{n} comidas</option>)}</Select></Field></div><div className="mt-4 grid grid-cols-3 gap-2">{([{ id: "PERDIDA", label: "Déficit", sub: "−15%" }, { id: "MANTENIMIENTO", label: "Mantener", sub: "Equilibrio" }, { id: "AUMENTO", label: "Superávit", sub: "+10%" }] as const).map((item) => <button type="button" key={item.id} onClick={() => actualizar("objetivo", item.id)} className={`rounded-xl border p-3 text-left transition ${perfil.objetivo === item.id ? "border-emerald-500 bg-emerald-50 ring-1 ring-emerald-500 dark:bg-emerald-950/50" : "hover:bg-muted"}`}><span className="flex items-center justify-between text-sm font-bold">{item.label}{perfil.objetivo === item.id && <Check className="h-3.5 w-3.5 text-emerald-600" />}</span><span className="text-[11px] text-muted-foreground">{item.sub} calórico</span></button>)}</div></section>
+        <section><SectionTitle icon={<Target className="h-4 w-4" />} number="03" title="Gustos y necesidades" /><Field label="Preferencia de origen"><Select value={perfil.preferenciaOrigen} onChange={(e) => actualizar("preferenciaOrigen", e.target.value as never)}><option value="TODOS">Todo tipo de productos</option><option value="PRIORIZAR_CRIOLLOS">Priorizar productos criollos</option><option value="INCLUIR_COMERCIALES">Incluir no criollos / comerciales</option></Select></Field><div className="mt-4"><span className="text-xs font-semibold">Alergias o exclusiones</span><div className="mt-2 flex flex-wrap gap-2">{alergiasDisponibles.map((alergia) => <button type="button" key={alergia} onClick={() => alternarAlergia(alergia)} className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${perfil.alergias.includes(alergia) ? "border-red-300 bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300" : "hover:bg-muted"}`}>{perfil.alergias.includes(alergia) && <Check className="mr-1 inline h-3 w-3" />}{alergia.replaceAll("_", " ").toLowerCase()}</button>)}</div></div><div className="mt-4"><span className="text-xs font-semibold">Duración del plan</span><div className="mt-2 grid grid-cols-2 gap-2">{[1, 7].map((dias) => <button type="button" key={dias} onClick={() => actualizar("dias", dias)} className={`rounded-xl border p-3 text-sm font-semibold ${perfil.dias === dias ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50" : ""}`}>{dias === 1 ? "Un día" : "Semana · 7 días"}</button>)}</div></div></section>
+      </div>
+      {error && <div role="alert" className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">{error}</div>}
+      <Button type="submit" size="lg" disabled={cargando} className="mt-7 w-full">{cargando ? <><LoaderCircle className="h-5 w-5 animate-spin" />Calculando y cuadrando tu plan...</> : <><BrainCircuit className="h-5 w-5" />Crear mi plan nutricional<ArrowRight className="ml-auto h-5 w-5" /></>}</Button>
+      <p className="mt-3 text-center text-[11px] leading-relaxed text-muted-foreground">Solo para adultos. No uses este flujo en embarazo, enfermedad renal, diabetes u otra condición clínica sin supervisión profesional.</p>
+    </form>
+    <aside className="space-y-5">
+      <div className="rounded-3xl border bg-gradient-to-br from-emerald-900 to-teal-800 p-6 text-white shadow-soft"><span className="text-xs font-bold uppercase tracking-widest text-emerald-200">Precisión antes que improvisación</span><h3 className="mt-2 text-xl font-bold">La matemática no la decide la IA</h3><div className="mt-6 space-y-5"><Process icon={<Calculator />} title="Calculamos tus metas" text="TMB, TDEE y macros mediante ecuaciones reconocidas." /><Process icon={<Database />} title="Elegimos alimentos reales" text="IA opcional o motor local, siempre con IDs del catálogo." /><Process icon={<ShieldCheck />} title="Cuadramos y auditamos" text="Gramajes optimizados y tolerancia comprobada de ±3%." /></div></div>
+      <div className="rounded-2xl border bg-card p-5"><h3 className="font-bold">Modo local transparente</h3><p className="mt-2 text-xs leading-relaxed text-muted-foreground">Sin credenciales externas, el plan usa selección gastronómica determinística. Si configuras Gemini, Groq u OpenRouter, se activa el menú asistido por IA con fallback automático.</p><div className="mt-3 inline-flex rounded-full bg-teal-50 px-3 py-1 text-[11px] font-bold text-teal-700 dark:bg-teal-950 dark:text-teal-300">Cálculo disponible sin API keys</div></div>
+      <MedicalNotice />
+    </aside>
+  </div>;
+}
+
+function SectionTitle({ icon, number, title }: { icon: React.ReactNode; number: string; title: string }) { return <div className="mb-4 flex items-center gap-2 border-b pb-3"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950">{icon}</span><h3 className="text-sm font-bold">{title}</h3><span className="ml-auto text-xs font-bold text-muted-foreground/60">{number}</span></div>; }
+function Process({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) { return <div className="flex gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 [&>svg]:h-4 [&>svg]:w-4">{icon}</span><div><h4 className="text-sm font-semibold">{title}</h4><p className="mt-0.5 text-xs leading-relaxed text-emerald-100/70">{text}</p></div></div>; }
+export function MedicalNotice() { return <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-relaxed text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"><strong className="mb-1 block">Aviso importante</strong>MacrOrigen es una herramienta orientativa basada en tablas nutricionales. No diagnostica ni sustituye la valoración de un nutricionista dietista profesional en Colombia.</div>; }

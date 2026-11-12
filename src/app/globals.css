@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 150 25% 99%; --foreground: 172 32% 12%;
+    --card: 0 0% 100%; --card-foreground: 172 32% 12%;
+    --primary: 160 84% 29%; --primary-foreground: 0 0% 100%;
+    --secondary: 174 62% 95%; --secondary-foreground: 174 80% 20%;
+    --muted: 150 18% 95%; --muted-foreground: 170 10% 43%;
+    --accent: 166 70% 94%; --accent-foreground: 166 80% 23%;
+    --border: 158 18% 87%; --input: 158 18% 82%; --ring: 160 84% 39%;
+    --destructive: 0 72% 50%; --destructive-foreground: 0 0% 100%;
+  }
+  .dark {
+    --background: 175 27% 7%; --foreground: 150 20% 94%;
+    --card: 174 23% 10%; --card-foreground: 150 20% 94%;
+    --primary: 159 70% 43%; --primary-foreground: 166 80% 8%;
+    --secondary: 174 30% 15%; --secondary-foreground: 166 45% 83%;
+    --muted: 174 20% 14%; --muted-foreground: 158 12% 66%;
+    --accent: 169 30% 15%; --accent-foreground: 159 60% 78%;
+    --border: 170 19% 19%; --input: 170 18% 27%; --ring: 160 65% 45%;
+  }
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; }
+  body { @apply bg-background text-foreground antialiased; }
+  ::selection { background: rgba(16, 185, 129, .22); }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .grid-noise { background-image: radial-gradient(rgba(16,185,129,.16) 1px, transparent 1px); background-size: 22px 22px; }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(16,185,129,.3); border-radius: 10px; }
+}

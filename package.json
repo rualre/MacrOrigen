@@ -1,0 +1,56 @@
+{
+  "name": "macrorigen",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "test:auth": "node scripts/auth-smoke-test.mjs",
+    "test:cuentas": "node scripts/demo-accounts-smoke.mjs",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "import:intercambios": "tsx scripts/import-intercambios.ts",
+    "cuentas:demo": "node scripts/crear-cuentas-demo.mjs"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^3.0.145",
+    "@ai-sdk/groq": "^3.0.83",
+    "@ai-sdk/openai-compatible": "^2.0.93",
+    "@prisma/client": "^6.12.0",
+    "@radix-ui/react-slot": "^1.1.2",
+    "@upstash/ratelimit": "^2.0.5",
+    "@upstash/redis": "^1.34.5",
+    "ai": "^6.0.330",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
+    "next": "^16.4.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.6.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.0",
+    "prisma": "^6.12.0",
+    "tailwindcss": "^3.4.17",
+    "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.4.6",
+    "vitest": "^4.1.12"
+  }
+}
