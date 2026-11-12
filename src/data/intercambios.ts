@@ -28,17 +28,17 @@ export const FUENTE_GABA_UDEA: FuenteIntercambio = {
 };
 
 export const FUENTE_UDEA_2023: FuenteIntercambio = {
-  nombre: "UdeA — Lista de intercambio de alimentos, 5.ª edición 2023 (reservada)",
+  nombre: "UdeA — Lista de intercambio de alimentos, 5.ª edición 2023",
   documento:
-    "Pendiente de cargar el archivo autorizado por la Universidad de Antioquia. El importador JSON/CSV permite incorporarla sin cambiar el motor.",
+    "Archivo local disponible: docs/Lista de intercambios - U de Antioquia 2.pdf (escaneado, 27 páginas). Pendiente de extracción estructurada y validación cruzada con el catálogo actual.",
   url: "https://www.udea.edu.co/",
   anio: 2023,
   alcance:
-    "No se usó para inventar pesos ni nutrientes. Los registros actuales se limitan a GABA 2015/UdeA y a homologaciones explícitas.",
+    "Ya no se considera inaccesible: se dispone del PDF autorizado. Su integración completa requiere OCR/tablas estructuradas y una migración controlada para no romper los perfiles GABA ni la validación ±3%.",
 };
 
 const sinDatoUdeA2023 =
-  "La tabla UdeA 2023 no se reprodujo: no está disponible en acceso abierto y no se inventaron equivalencias.";
+  "La tabla UdeA 2023 ya está disponible localmente; su extracción estructurada y validación cruzada están pendientes, por lo que no se inventaron equivalencias ni nutrientes.";
 
 export const GRUPOS_INTERCAMBIO_DEF: GrupoIntercambioDef[] = [
   {

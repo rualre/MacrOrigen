@@ -123,6 +123,6 @@ Antes del primer despliegue hay que cargar las variables de entorno en Vercel. S
 - [ ] Upstash configurado si habrá más de una instancia.
 - [ ] Proveedor de pago y webhooks reales (hoy es checkout demo).
 - [ ] Disclaimer médico y política de privacidad revisados.
-- [ ] Tabla UdeA 2023 autorizada cargada, si se va a citar como oficial.
+- [ ] Extraer y validar la tabla UdeA 2023 (PDF ya disponible localmente) antes de citarla como fuente oficial.
 - [ ] Pesos pediátricos autorizados cargados antes de prometer población `NINOS`.
 - [ ] PDF de pruebas actualizado tras el despliegue.
